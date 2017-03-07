@@ -22,6 +22,8 @@ OCP_HEKETI_TEMPLATE=../ocp-templates/heketi-template.yaml
 OCP_HEKETI_SA=../ocp-templates/heketi-service-account.yaml
 TOPOLOGY=../topology.json.sample
 
+source ./mock.sh
+
 # syntax checking can not be done if file has more than one yaml context 
 # so split and call check
 # check kube-templates/heketi-deployment.yaml to understand what I am talking about
@@ -46,8 +48,8 @@ check() {
 }
 
 # copies the source and adds the mock source. This will be used for testing
-cp ../gk-deploy gk-deploy-unit
-sed -i '16s/^/\nsource mock.sh/' gk-deploy-unit
+#cp ../gk-deploy gk-deploy-unit
+#sed -i '16s/^/\nsource mock.sh/' gk-deploy-unit
 
 # Just to verify if the syntax is actually tested
 TEST=$(python -c 'import yaml,sys;yaml.safe_load(sys.stdin)' < ./glusterfs-daemonset-wrong.yaml 2> /dev/null)
@@ -70,28 +72,27 @@ do
   fi
 done
 
-./gk-deploy-unit -y
+../gk-deploy -y
 if [[ ${?} -ne 0 ]]; then
   echo "Failed. Topology failure: check good"
 fi
 
-./gk-deploy-unit -y -c fail "${TOPOLOGY}"
+../gk-deploy -y -c fail "${TOPOLOGY}"
 if [[ ${?} -ne 0 ]]; then
   echo "Failed. cli failure: check good"
 fi
 
-./gk-deploy-unit -y -c kubectl -n invalid "${TOPOLOGY}"
+../gk-deploy -y -c kubectl -n invalid "${TOPOLOGY}"
 if [[ ${?} -ne 0 ]]; then
   echo "Failed. NameSpace failure: check good"
 fi
 
-./gk-deploy-unit -y -n invalid "${TOPOLOGY}"
+../gk-deploy -y -n invalid "${TOPOLOGY}"
 if [[ ${?} -ne 0 ]]; then
   echo "Failed. NameSpace failure without cli: check good"
 fi
 
 # This has to be moved to teardown function
 rm file*
-rm gk-deploy-unit
 
 # More test will be add after mock is done

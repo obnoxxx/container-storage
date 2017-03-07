@@ -15,10 +15,12 @@
 # limitations under the License.
 
 # Mock functions for heketi
-heketi-cli() {
-topo=`cat ./topology-output-wrong.txt`
-echo "${topo}"
+heketi_cli() {
+  topo=`cat ./topology-output-wrong.txt`
+  echo "${topo}"
 }
+
+alias heketi-cli=heketi_cli
 
 
 # Mock functions for kube
